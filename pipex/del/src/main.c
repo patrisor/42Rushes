@@ -6,7 +6,7 @@
 /*   By: vbrazas <vbrazas@student.unit.ua>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/07/21 15:14:41 by vbrazas           #+#    #+#             */
-/*   Updated: 2019/08/16 14:04:49 by patrisor         ###   ########.fr       */
+/*   Updated: 2019/08/18 13:55:25 by patrisor         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,28 +27,41 @@ int				put_usage(const int errnum)
 	return (1);
 }
 
+// Dereference every file descriptor AND exit every child process 
 static	void	closer(t_pip *p)
 {
+	// Dereference every file descriptor 
 	(close(p->fd[0][0]) == -1) ? put_usage(0) : false;
 	(close(p->fd[0][1]) == -1) ? put_usage(0) : false;
 	(close(p->fd[1][0]) == -1) ? put_usage(0) : false;
 	(close(p->fd[1][1]) == -1) ? put_usage(0) : false;
+	// A call to wait() blocks the calling process until one of its child processes exits or a signal is received
 	while (wait(NULL) > 0)
 		;
 }
 
+// Create a fork for each system call, then redirect 2 file descriptors to stdin and stdout (close the opposite 2)
+// Execute the system call at the end
 static	void	performfork(t_pip *p, int i, char **av, char **env)
 {
 	static char			**cmd_arr;
 
+	// Creates a command array -> from "ls -l" into ["/usr/bin/ls","-l"]
 	cmd_arr = get_cmd_arr(av[2 + i], p);
+
+	// Create a child process based on each individual system command
 	((p->pid = fork()) == -1) ? put_usage(0) : false;
 	if (p->pid == 0)
 	{
+		// system call creates a copy of the old file descriptor (p->fd[i][0]) to be
+		// the new file descriptor, 0, or stdin. (Redirection)
 		(dup2(p->fd[i][0], 0) == -1) ? put_usage(0) : false;
+		// system call creates a copy of the old file descriptor to be the new fd, 1, or stdout.
 		(dup2(p->fd[i][1], 1) == -1) ? put_usage(0) : false;
+		// Close the opposite file descriptors (if i == 0), then close(p->fd[1][0]) is executed
 		(close(p->fd[!(i % 2)][0]) == -1) ? put_usage(0) : false;
 		(close(p->fd[!(i % 2)][1]) == -1) ? put_usage(0) : false;
+		// Executes the forked system command
 		(execve(cmd_arr[0], cmd_arr, env) == -1) ? put_usage(0) : false;
 	}
 }
@@ -84,11 +97,11 @@ int				main(int ac, char **av, char **env)
 	(p.fd[0][0] == -1 || p.fd[1][1] == -1) ? put_usage(0) : false;
 	// Grabs list of Environmental Variables and returns the "PATH=" String.
 	p.path = get_path(env);
-	// 
+	// Create a fork for each system call, then redirect 2 file descriptors to stdin and stdout, then run
 	performfork(&p, 0, av, env);
-	//
+	// Create a fork for each system call, then redirect 2 file descriptors to stdin and stdout, then run 
 	performfork(&p, 1, av, env);
-	// 
+	// Dereference every file descriptor AND exit every child process
 	closer(&p);
 	return (0);
 }
