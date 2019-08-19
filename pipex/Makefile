@@ -6,7 +6,7 @@
 #    By: patrisor <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/08/18 15:31:49 by patrisor          #+#    #+#              #
-#    Updated: 2019/08/18 15:53:36 by patrisor         ###   ########.fr        #
+#    Updated: 2019/08/18 21:58:00 by patrisor         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,11 +18,11 @@ INC_PATH = includes/
 OBJ_PATH = obj/
 
 C = clang
-WFLAGS = -Wall -Werror -Wextra
+WFLAGS = #-Wall -Werror -Wextra
 IFLAGS = -I $(INC_PATH) -I $(LIB_PATH)
 
 LIB = $(LIB_PATH)libft.a
-FILES = main 
+FILES = main pipex aux 
 
 SRCS = $(addprefix $(SRC_PATH), $(addsuffix .c, $(FILES)))
 OBJ = $(addprefix $(OBJ_PATH), $(SRCS:%.c=%.o))

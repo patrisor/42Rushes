@@ -6,7 +6,7 @@
 /*   By: patrisor <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/08/18 15:35:46 by patrisor          #+#    #+#             */
-/*   Updated: 2019/08/18 15:51:57 by patrisor         ###   ########.fr       */
+/*   Updated: 2019/08/18 21:53:23 by patrisor         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,5 +26,14 @@ typedef struct	s_pipex
 	pid_t		pid;
 	char		**path;
 }				t_pip;
+
+/* ******************** AUX ******************** */
+char	**getPath(char **env);
+char	**getCommand(char a[], const t_pip *p);
+int		die(char *reason);
+/* ******************* PIPEX ******************* */
+int		initPipe(t_pip *p, char **a, char **e);
+int		cleanPipe(t_pip *p);
+int     forkMe(t_pip *p, int i, char **a, char **e);
 
 #endif
